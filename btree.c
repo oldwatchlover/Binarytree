@@ -153,26 +153,31 @@ BTreeFindNode(node_td *root, int key)
 node_td *
 BTreeDeleteNode(node_td *root, int key)
 {
-#if 0 /* TODO */
-    /*
+#if 0
+    if (root == (node_td *) NULL)
+	return (node_td *)NULL;
 
-    if root == null, return null
+    if (key > root->key) {
+	root->right = BTreeDeleteNode(root->right, key);
+	return (root->right);
+    } else if (key < root->key) {
+	root->left = BTreeDeleteNode(root->left, key);
+	return (root->left);
+    } else {		/* key == root->key */
 
-    if key > root->key
-       root->right = delete_node(root->right, key)
-    else if (key < root->key)
-       root->left = delete_node(root->left, key)
-    else if (key == root->key) {
-	handle one child
+	    /* node is a leaf, delete it */
+	if (BTreeIsLeaf(root)) {
+        }
 
-        handle two child
+	    /* if node has only one child, handle that case */
+	if (root->left == (node_td *)NULL || node->right == (node_td *)NULL) {
+        }
+
+	    /* if node has two children, handle that case */
+       
     }
-
-return root
-
-    */
 #endif
-    return (node_td *) NULL;
+    return (node_td *)NULL;
 }
 
 
