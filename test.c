@@ -27,7 +27,7 @@ char    *ProgramName;
  * we use relatively small numbers (<32) so we can print out the tree nicely formatted
  * (it works just fine with larger values, but the output gets unwieldly)
  */
-#define MAX_KEY (18)
+#define MAX_KEY (32)
 static int	test_size = MAX_KEY;
 
 static float
@@ -49,12 +49,14 @@ main(int argc, char *argv[])
 {
     int         i, key;
     node_td	*root;
-    time_t	t;
 
     ProgramName = (char *) malloc(strlen(argv[0])+1);
     strcpy(ProgramName, argv[0]);
 
-    srand((unsigned) time(&t)); /* seed rand() */
+/*
+ * disable this to get repeatable random sequence for debugging:
+    srand((unsigned) time(NULL)); 
+ */
 
 #define USAGE_STRING    "[-h] [-s size]"
 
@@ -109,6 +111,15 @@ main(int argc, char *argv[])
     BTreeUtilPrintByLevel(root);
     fprintf(stdout,"\n");
 
+#if 0
+    root = BTreeFreeTree(root);
+
+    fprintf(stdout,"%s : Print by Level Traversal:\n",ProgramName);
+    BTreeUtilPrintByLevel(root);
+    fprintf(stdout,"\n");
+#endif
+
+
 	/* search our tree for some values, see if they are there.... */
 
     fprintf(stdout,"%s : test our tree by searching for some values...\n\n",ProgramName);
@@ -121,11 +132,58 @@ main(int argc, char *argv[])
         } else {									
             fprintf(stdout,"%s : searching for node (%02d)... %s%s%s ",			
 		ProgramName, i, GREEN_COLOR_TEXT, "Found!", DEFAULT_COLOR_TEXT);	
-	    fprintf(stdout,"\tkey = %02d, count = %d, index = %d\n",			
-		p->key,p->count,p->index);						
+	    fprintf(stdout,"\tkey = %02d, index = %d\n",			
+		p->key,p->index);						
         }										
     }
     fprintf(stdout,"\n");
+
+    fprintf(stdout,"%s: delete node (%d) ",ProgramName,13);
+    if (BTreeDeleteNode(&root, 13)) {
+        fprintf(stdout,"%s%s%s\n", GREEN_COLOR_TEXT, "Success!", DEFAULT_COLOR_TEXT);	
+    } else {
+        fprintf(stdout,"%s%s%s\n", RED_COLOR_TEXT, "Failed!", DEFAULT_COLOR_TEXT);	
+    }
+    fprintf(stdout,"%s : Print by Level Traversal:\n",ProgramName);
+    BTreeUtilPrintByLevel(root);
+    fprintf(stdout,"\n");
+
+    fprintf(stdout,"%s: delete node (%d) ",ProgramName,8);
+    if (BTreeDeleteNode(&root, 8)) {
+        fprintf(stdout,"%s%s%s\n", GREEN_COLOR_TEXT, "Success!", DEFAULT_COLOR_TEXT);	
+    } else {
+        fprintf(stdout,"%s%s%s\n", RED_COLOR_TEXT, "Failed!", DEFAULT_COLOR_TEXT);	
+    }
+    fprintf(stdout,"%s : Print by Level Traversal:\n",ProgramName);
+    BTreeUtilPrintByLevel(root);
+    fprintf(stdout,"\n");
+
+    fprintf(stdout,"%s: delete node (%d) ",ProgramName,24);
+    if (BTreeDeleteNode(&root, 24)) {
+        fprintf(stdout,"%s%s%s\n", GREEN_COLOR_TEXT, "Success!", DEFAULT_COLOR_TEXT);	
+    } else {
+        fprintf(stdout,"%s%s%s\n", RED_COLOR_TEXT, "Failed!", DEFAULT_COLOR_TEXT);	
+    }
+    fprintf(stdout,"%s : Print by Level Traversal:\n",ProgramName);
+    BTreeUtilPrintByLevel(root);
+    fprintf(stdout,"\n");
+
+    fprintf(stdout,"%s: delete node (%d) ",ProgramName,16);
+    if (BTreeDeleteNode(&root, 16)) {
+        fprintf(stdout,"%s%s%s\n", GREEN_COLOR_TEXT, "Success!", DEFAULT_COLOR_TEXT);	
+    } else {
+        fprintf(stdout,"%s%s%s\n", RED_COLOR_TEXT, "Failed!", DEFAULT_COLOR_TEXT);	
+    }
+    fprintf(stdout,"%s : Print by Level Traversal:\n",ProgramName);
+    BTreeUtilPrintByLevel(root);
+    fprintf(stdout,"\n");
+
+    fprintf(stdout,"%s : rebalance tree...\n",ProgramName);
+    root = BTreeRebalance(root);
+    fprintf(stdout,"%s : Print by Level Traversal:\n",ProgramName);
+    BTreeUtilPrintByLevel(root);
+    fprintf(stdout,"\n");
+
 
     fprintf(stdout,"%s : Inorder Traversal:\n",ProgramName);
     BTreeUtilPrintByInorderTraversal(root);
@@ -137,7 +195,6 @@ main(int argc, char *argv[])
     fprintf(stdout,"\n");
     fprintf(stdout,"\n");
 
-#if 0
     fprintf(stdout,"%s : Preorder Traversal:\n",ProgramName);
     BTreeUtilPrintByPreorderTraversal(root);
     fprintf(stdout,"\n");
@@ -147,7 +204,6 @@ main(int argc, char *argv[])
     BTreeUtilPrintByPostorderTraversal(root);
     fprintf(stdout,"\n");
     fprintf(stdout,"\n");
-#endif
 
     exit (EXIT_SUCCESS);
 
