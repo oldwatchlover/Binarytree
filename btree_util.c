@@ -32,9 +32,6 @@ print_node(node_td *p)
         fprintf(stdout,"(%d) ",p->key);
 #ifdef VERBOSE
         fprintf(stdout,"<%d> ",p->index);
-        if (p->count > 1) {
-            fprintf(stdout,"[%d] ",p->count);
-        }
 	if (BTreeNodeIsLeaf(p)) {
 	    fprintf(stdout,"(leaf node)\n");
 	} else {
@@ -43,16 +40,6 @@ print_node(node_td *p)
 	fprintf(stdout,"\tleft = %08x\n\tright = %08x\n\tparent = %08x\n",
 		(unsigned int)p->left,
 		(unsigned int)p->right, (unsigned int)p->parent);
-	fprintf(stdout,"\tnext = %08x ",(unsigned int)p->next);
-
-        if (p->next != (node_td *) NULL) {
-	    node_td	*tp;
-	    tp = p->next;
-	    while (tp->next != (node_td *) NULL) {
-	        fprintf(stdout,"%08x ",(unsigned int)tp->next);
-	        tp = tp->next;
-	    }
-	}
 	fprintf(stdout,"\n");
 #endif
     }
