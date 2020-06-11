@@ -46,6 +46,12 @@ BTreeFreeNode(node_td *node)
     free(node);
 }
 
+/*
+ * disassemble and deallocate the memory of an entire tree
+ *
+ * returns root (which will be NULL)
+ *
+ */
 node_td *
 BTreeFreeTree(node_td *root)
 {
@@ -69,16 +75,13 @@ int
 BTreeNodeIsLeaf(node_td *p)
 {
     if (p == (node_td *) NULL) {
-#ifdef DEBUG
-	fprintf(stderr,"ERROR : BTreeNodeIsLeaf(p) == NULL\n");
-#endif
-	return 1;
+	return 1;	/* is NULL considered a leaf node? I think so */
     }
 
-    if (p->left == (node_td *) NULL && p->right == (node_td *) NULL)
-        return 1;
+    if ((p->left == (node_td *) NULL) && (p->right == (node_td *) NULL))
+        return 1;	/* both children empty */
     else
-        return 0;
+        return 0;	/* at least one child, not a leaf node */
 }
 
 /*
@@ -88,9 +91,13 @@ BTreeNodeIsLeaf(node_td *p)
  * key is the key value, (new node < key) goes to the left child, 
  * (new node > key) goes to the right child.
  *
- * (new node == key) is a special case, we do not allow dupicates\
- * just ignore. 
+ * (new node == key) is a special case; we do not allow dupicates so
+ * we just ignore it. 
  *
+ * Follow the recursion and the index math here... the index of a node
+ * will be the location in a 0 based array if they binary tree were stored
+ * in an array. We will use this info as a position to print out the array
+ * in a pretty tree format.
  */
 node_td *
 BTreeInsertNode(node_td *root, int key, node_td *parent, int index, void *data)
@@ -120,9 +127,6 @@ BTreeGetHeight(node_td *node)
     int		leftMax, rightMax;
 
     if (node == NULL) {
-#ifdef DEBUG
-	fprintf(stderr,"ERROR : BTreeGetHeight(p) == NULL\n");
-#endif
         return 0;
     }
     leftMax = 1 + BTreeGetHeight(node->left);
@@ -136,7 +140,7 @@ BTreeGetHeight(node_td *node)
 
 
 /*
- * Find a node in the tree, return it
+ * Find a node in the tree by key value and return it
  *
  * Efficiently traverse the tree looking for node with <key>
  *
@@ -160,12 +164,12 @@ BTreeFindNode(node_td *root, int key)
     }
 }
 
-/* temporary data structures and functions for some of the more complicated operations
+/* Temporary data structures and functions for some of the more complicated operations
  * (delete node, rebalance tree, etc.)
  */
 
-/* a linked list of nodes to keep track of any nodes that get orphaned if we delete their parent 
- * after the deletion, we'll retrive nodes off this list and re-insert them into the tree
+/* A linked list of nodes to keep track of any nodes that get orphaned if we delete their parent. 
+ * After the deletion, we'll retrive nodes off this list and re-insert them into the tree
  */
 
 typedef struct nodelist_st
@@ -182,6 +186,8 @@ static int		tempListLength = 0;
  *
  * Traverses a disconnected subtree and inserts them
  * into our temporary linked list
+ *
+ * The traversal is "preorder" traversal
  */
 static void
 buildTempList(node_td *subtree)
@@ -196,7 +202,7 @@ buildTempList(node_td *subtree)
 	    tempNodeList->next = (nodelist_td *) NULL;
 	    tempListLength = 1;
 	} else {
-	    p = tempNodeList;
+	    p = tempNodeList;	/* append at the end of the list */
 	    while (p->next != (nodelist_td *) NULL) { 
 	        p = p->next;
             }
@@ -211,6 +217,9 @@ buildTempList(node_td *subtree)
 }
 
 #ifdef DEBUG
+/*
+ * a utility to follow and print out the temporary list, for debugging
+ */
 static void
 printTempList(void)
 {
@@ -352,7 +361,7 @@ BTreeDeleteNode(node_td **root, int key)
 
         addTempListToTree(root);
  
-        subtreeL = BTreeFreeTree(subtreeL);
+        subtreeL = BTreeFreeTree(subtreeL);	/* must free old tree(s) after we add the nodes */
         subtreeR = BTreeFreeTree(subtreeR);
 
         freeTempList();
@@ -377,7 +386,7 @@ BTreeDeleteNode(node_td **root, int key)
     buildTempList(subtreeR);
     addTempListToTree(root);
 
-    subtreeL = BTreeFreeTree(subtreeL);
+    subtreeL = BTreeFreeTree(subtreeL);	/* must free old tree(s) after we add the nodes */
     subtreeL = BTreeFreeTree(subtreeR);
     BTreeFreeNode(deleteme);
     freeTempList();
@@ -404,9 +413,7 @@ BTreeRebalance(node_td *root)
     buildTempList(root);
 
 	/* find the median key in the list:
-         * (knows that buildTempList() walks the tree in-order, 
-         * resulting in a sorted list, so the median key is the key
-         * from the middle of the list 
+         * choose the node in  the middle of the list 
          */
     medkey = tempListLength/2;
     i = 0;
